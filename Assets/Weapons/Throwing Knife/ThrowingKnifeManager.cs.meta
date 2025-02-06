@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 5edc05196f617a74cb28ff74f3cb7649
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - ThrowingKnifePrefab: {fileID: 2797687039121077318, guid: dd3181885e022b84f8f5b18f7ee13d7f, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
