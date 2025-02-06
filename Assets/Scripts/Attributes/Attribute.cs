@@ -20,6 +20,7 @@ public class Attribute
     public Attribute(double baseValue)
     {
         this.BaseValue = baseValue;
+        UpdateValue();
     }
 
     public void AddModifier(AttributeModifier modifier) { 

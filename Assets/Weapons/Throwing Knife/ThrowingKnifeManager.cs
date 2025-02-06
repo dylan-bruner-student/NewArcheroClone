@@ -12,9 +12,9 @@ public class ThrowingKnifeManager : BaseWeaponManager
 
     void Update()
     {
-
         if (LastSpawnTime + SpawnDelay.Value < Time.time)
         {
+            Debug.Log("Spawning frs");
             LastSpawnTime = Time.time;
             var gameObj = Instantiate(ThrowingKnifePrefab);
             gameObj.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;

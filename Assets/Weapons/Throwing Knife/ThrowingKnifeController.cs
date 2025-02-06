@@ -14,14 +14,18 @@ public class ThrowingKnifeController : BaseWeaponController
 
     void Update()
     {
-        if (Target == null || Target.gameObject.IsDestroyed()) {
+        if (Target == null || Target.gameObject.IsDestroyed())
+        {
             Destroy(gameObject);
             return;
         }
 
-        Vector3 move = Vector3.MoveTowards(transform.position, Target.transform.position, Time.deltaTime * (float) MovementSpeed.Value);
+        Vector3 direction = (Target.transform.position - transform.position).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90);
+
+        Vector3 move = Vector3.MoveTowards(transform.position, Target.transform.position, Time.deltaTime * (float)MovementSpeed.Value);
         transform.position = move;
-        transform.LookAt(transform.position);
 
         var targetCollider = Target.GetComponent<Collider2D>();
         if (targetCollider == null)
@@ -32,7 +36,7 @@ public class ThrowingKnifeController : BaseWeaponController
 
         if (GetComponent<BoxCollider2D>().IsTouching(targetCollider))
         {
-            Target.GetComponent<EnemyController>().Damage((float) Damage.Value);
+            Target.GetComponent<EnemyController>().Damage((float)Damage.Value);
             Destroy(gameObject);
         }
     }
