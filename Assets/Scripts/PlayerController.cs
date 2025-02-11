@@ -7,22 +7,31 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float MovementSpeed = 10f;
+    [Header("Refrences")]
     [SerializeField] private GameObject enemy;
     [SerializeField] private Image HealthBar;
 
+    [Header("Other")]
+    [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] private float MaxHealth = 1000f;
+
+    [Header("Status")]
+    [SerializeField] public bool IsMoving = false;
     [SerializeField] private float Health = 1000f;
 
     [Header("Weapons")]
     [SerializeField] private GameObject ThrowingKnife;
+    [SerializeField] private GameObject MightyBall;
+
+    
+    public static PlayerController Instance { get; private set; }
 
 
     void Start() {
-        gameObject.AddComponent<ThrowingKnifeManager>();
-        gameObject.GetComponent<ThrowingKnifeManager>().ThrowingKnifePrefab = ThrowingKnife;
+        Instance = this;
 
-        gameObject.AddComponent<MightyBallsManager>();
+        gameObject.AddComponent<ThrowingKnifeManager>().ThrowingKnifePrefab = ThrowingKnife;
+        gameObject.AddComponent<MightyBallsManager>().BallRefrence = MightyBall;
     }
 
 
@@ -45,8 +54,14 @@ public class PlayerController : MonoBehaviour
             thing.transform.position = new Vector3(Random.Range(-25, 25), Random.Range(-25, 25));
         }
 
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+        }
+
         var rb = GetComponent<Rigidbody2D>();
         rb.velocity = velocity;
+        IsMoving = rb.velocity.sqrMagnitude > 0;
     }
 
 

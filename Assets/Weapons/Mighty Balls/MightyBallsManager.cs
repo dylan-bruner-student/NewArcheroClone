@@ -4,7 +4,45 @@ using UnityEngine;
 
 public class MightyBallsManager : BaseWeaponManager
 {
-    void Update()
+    [SerializeField] public GameObject BallRefrence;
+    [SerializeField] public int BallCount = 4;
+    [SerializeField] public float Offset = 2f;
+
+    private List<GameObject> ball_list = new List<GameObject>();
+
+    private void Start()
     {
+        SpawnBalls();
+    }
+
+    private void OnValidate()
+    {
+        ClearBalls();
+        SpawnBalls();
+    }
+
+    private void ClearBalls()
+    {
+        foreach (var ball in ball_list)
+            Destroy(ball);
+        ball_list.Clear();
+    }
+
+    private void SpawnBalls()
+    {
+        ClearBalls();
+        var playerObject = PlayerController.Instance.gameObject;
+
+        for (int i = 0; i < BallCount; i++)
+        {
+            float angle = i * (2 * Mathf.PI / BallCount); // Distribute evenly around a circle
+            Vector3 spawnPosition = playerObject.transform.position + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * Offset;
+
+            var ball = Instantiate(BallRefrence, spawnPosition, Quaternion.identity);
+            var controller = ball.AddComponent<MightyBallsController>();
+            controller.centerPoint = playerObject;
+
+            ball_list.Add(ball);
+        }
     }
 }

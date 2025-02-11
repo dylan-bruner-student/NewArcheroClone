@@ -7,14 +7,24 @@ public class ThrowingKnifeManager : BaseWeaponManager
     [SerializeField] public GameObject ThrowingKnifePrefab;
 
     private float LastSpawnTime = 0;
-    public Attribute SpawnDelay = new Attribute(0.25);
-    public Attribute AttackRange = new Attribute(25);
+
+    [SerializeField] public float SpawnDelay = 0.25f;
+    [SerializeField] public float AttackRange = 25;
+
+    public static ThrowingKnifeManager Instance;
+
+    private void Start()
+    {
+        Instance = this;
+    }
 
     void Update()
     {
-        if (LastSpawnTime + SpawnDelay.Value < Time.time)
+        if (PlayerController.Instance.IsMoving)
+            return;
+
+        if (LastSpawnTime + SpawnDelay < Time.time)
         {
-            Debug.Log("Spawning frs");
             LastSpawnTime = Time.time;
             var gameObj = Instantiate(ThrowingKnifePrefab);
             gameObj.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;
@@ -36,7 +46,7 @@ public class ThrowingKnifeManager : BaseWeaponManager
         foreach (var enemy in enemies)
         {
             float distance = Vector3.Distance(player.transform.position, enemy.transform.position);
-            if (distance < AttackRange.Value && distance < minDistance)
+            if (distance < AttackRange && distance < minDistance)
             {
                 minDistance = distance;
                 nearestEnemy = enemy;
