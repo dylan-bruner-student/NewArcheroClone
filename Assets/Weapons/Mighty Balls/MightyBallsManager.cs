@@ -8,17 +8,25 @@ public class MightyBallsManager : BaseWeaponManager
     [SerializeField] public int BallCount = 4;
     [SerializeField] public float Offset = 2f;
 
+    public static MightyBallsManager Instance;
+
     private List<GameObject> ball_list = new List<GameObject>();
+
+    public void Refresh()
+    {
+        ClearBalls();
+        SpawnBalls();
+    }
 
     private void Start()
     {
+        Instance = this;
         SpawnBalls();
     }
 
     private void OnValidate()
     {
-        ClearBalls();
-        SpawnBalls();
+        Refresh();
     }
 
     private void ClearBalls()

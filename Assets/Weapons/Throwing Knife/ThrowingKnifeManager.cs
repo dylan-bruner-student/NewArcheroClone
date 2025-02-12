@@ -20,9 +20,6 @@ public class ThrowingKnifeManager : BaseWeaponManager
 
     void Update()
     {
-        if (PlayerController.Instance.IsMoving)
-            return;
-
         if (LastSpawnTime + SpawnDelay < Time.time)
         {
             LastSpawnTime = Time.time;

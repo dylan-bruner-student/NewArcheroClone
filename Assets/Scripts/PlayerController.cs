@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Refrences")]
     [SerializeField] private GameObject enemy;
-    [SerializeField] private Image HealthBar;
+    [SerializeField] private GameObject HealthBar;
 
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
@@ -34,6 +34,11 @@ public class PlayerController : MonoBehaviour
         gameObject.AddComponent<MightyBallsManager>().BallRefrence = MightyBall;
     }
 
+    private void OnValidate()
+    {
+        Damage(0);
+    }
+
 
     void Update() {
         Vector3 velocity = Vector3.zero;
@@ -56,7 +61,12 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-            Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+            TimeSystem.TogglePause();
+        }
+
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            UpgradeController.Instance.PromptUpgrade(new AddBall(), new AddBall(), new AddBall());
         }
 
         var rb = GetComponent<Rigidbody2D>();
@@ -68,6 +78,10 @@ public class PlayerController : MonoBehaviour
     public void Damage(int damage)
     {
         Health = Mathf.Clamp(Health - damage, 0, MaxHealth);
-        HealthBar.fillAmount = (Health / 1000);
+        
+        float p = Health / MaxHealth;
+        HealthBar.transform.localScale = new Vector3(p, HealthBar.transform.localScale.y, HealthBar.transform.localScale.z);
+        HealthBar.transform.localPosition = new Vector3((p - 1) * 1 / 2, HealthBar.transform.localPosition.y, HealthBar.transform.localPosition.z);
+
     }
 }
