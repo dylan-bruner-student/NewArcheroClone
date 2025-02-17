@@ -7,18 +7,22 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Status")]
     [SerializeField] public bool IsMoving = false;
+    [SerializeField] public float LastDamagedTime = 0f;
     [SerializeField] private float Health = 1000f;
+    [SerializeField] private float Shield = 50f;
     [SerializeField] private int Score = 0;
     [SerializeField] private int UpgradesUnlocked = 0;
 
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] private float MaxHealth = 1000f;
+    [SerializeField] private float MaxShield = 50f;
     [SerializeField] public float m_PickupRadius = 1.5f;
 
     [Header("References")]
     [SerializeField] private GameObject Enemy;
     [SerializeField] private GameObject HealthBar;
+    [SerializeField] private GameObject ShieldBar;
     [SerializeField] private GameObject PickupRadius;
     [SerializeField] private Image UpgradeStatusBar;
 
@@ -46,6 +50,13 @@ public class PlayerController : MonoBehaviour
 
     void Update() {
         Vector3 velocity = Vector3.zero;
+
+        if (Time.time - LastDamagedTime > 1 && Shield < MaxShield)
+        {
+            Debug.Log("Regen shield!");
+            Shield = Mathf.Clamp(Shield + (5 * Time.deltaTime), 0, MaxShield);
+            Damage(0);
+        }
 
 
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
@@ -75,21 +86,45 @@ public class PlayerController : MonoBehaviour
             UpgradeController.Instance.PromptRandomUpgrades();
         }
 
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
+        { 
+            UpgradeController.Instance.AppliedUpgrades.Clear();
+            foreach (var upgrade in UpgradeController.Upgrades)
+                for (int i= 0; i < upgrade.MaxApplied; i++) 
+                    upgrade.SystemApplyUpgrade();
+            
+            Debug.Log($"Applied {UpgradeController.Instance.AppliedUpgrades.Count} upgrades!");
+        }
+
 
         var rb = GetComponent<Rigidbody2D>();
         rb.velocity = velocity;
         IsMoving = rb.velocity.sqrMagnitude > 0;
     }
 
-    public void Damage(int damage)
+    public void Damage(float damage)
     {
-        Health = Mathf.Clamp(Health - damage, 0, MaxHealth);
+        if (damage > 0)
+            LastDamagedTime = Time.time;
+
+        float shieldLeft = Mathf.Max(0, Shield - damage);
+        damage = Mathf.Max(0, damage - Shield);
+        Shield = shieldLeft;
+
+        Health = (int) Mathf.Clamp(Health - damage, 0, MaxHealth);
         
+        // update health bar
         float p = Health / MaxHealth;
         HealthBar.transform.localScale = new Vector3(p, HealthBar.transform.localScale.y, HealthBar.transform.localScale.z);
         HealthBar.transform.localPosition = new Vector3((p - 1) * 1 / 2, HealthBar.transform.localPosition.y, HealthBar.transform.localPosition.z);
 
+        // update the shield bar
+        float s = Shield / MaxShield;
+        ShieldBar.transform.localScale = new Vector3(s, ShieldBar.transform.localScale.y, ShieldBar.transform.localScale.z);
+        ShieldBar.transform.localPosition = new Vector3((s - 1) * 1 / 2, ShieldBar.transform.localPosition.y, ShieldBar.transform.localPosition.z);
     }
+
+    public void Damage(int damage) { Damage((float)damage);  }
 
     public void SetPickupRadius(float radius) 
     {

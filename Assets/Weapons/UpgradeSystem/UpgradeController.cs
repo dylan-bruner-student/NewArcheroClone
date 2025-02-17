@@ -19,7 +19,7 @@ public class UpgradeController : MonoBehaviour
     public Action Callback_Option2 = null;
     public Action Callback_Option3 = null;
 
-    private List<Upgrade> Upgrades = new List<Upgrade> { 
+    public static List<Upgrade> Upgrades = new List<Upgrade> { 
         new MightyBalls(), new AddBall(), new HeavyBalls(),
         new KnifeSkills(), new LongerKnifes(),
         new DoublePickupRadius()
