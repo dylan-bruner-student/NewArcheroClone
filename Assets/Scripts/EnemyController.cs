@@ -6,6 +6,7 @@ public class EnemyController : MonoBehaviour
 {
     [SerializeField] private float Health = 100f;
     [SerializeField] private float MovementSpeed = 10f;
+    [SerializeField] private GameObject CoinPrefab;
 
 
     void Start()
@@ -26,6 +27,7 @@ public class EnemyController : MonoBehaviour
         {
             player.GetComponent<PlayerController>().Damage(5);
             Destroy(gameObject);
+
         }
         
     }
@@ -35,5 +37,13 @@ public class EnemyController : MonoBehaviour
         Health -= damage;
         if (Health <= 0)
             Destroy(gameObject);
+    }
+
+
+    private void OnDestroy()
+    {
+        var pos = gameObject.transform.position;
+        pos.z = 0;
+        Instantiate(CoinPrefab, pos, Quaternion.identity);
     }
 }

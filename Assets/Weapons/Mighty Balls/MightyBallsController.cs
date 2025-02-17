@@ -26,6 +26,7 @@ public class MightyBallsController : MonoBehaviour
         transform.position = centerPoint.transform.position + offset;
         transform.RotateAround(centerPoint.transform.position, Vector3.forward, rotationSpeed * Time.deltaTime);
         offset = transform.position - centerPoint.transform.position;
+        transform.Rotate(Vector3.forward, (rotationSpeed * 4) * Time.deltaTime);
 
         var ourCollider = GetComponent<CircleCollider2D>();
 

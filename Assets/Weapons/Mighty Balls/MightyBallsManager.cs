@@ -5,8 +5,9 @@ using UnityEngine;
 public class MightyBallsManager : BaseWeaponManager
 {
     [SerializeField] public GameObject BallRefrence;
-    [SerializeField] public int BallCount = 4;
+    [SerializeField] public int BallCount = 0;
     [SerializeField] public float Offset = 2f;
+    [SerializeField] public float BallDamage = 1.0f;
 
     public static MightyBallsManager Instance;
 
@@ -49,6 +50,7 @@ public class MightyBallsManager : BaseWeaponManager
             var ball = Instantiate(BallRefrence, spawnPosition, Quaternion.identity);
             var controller = ball.AddComponent<MightyBallsController>();
             controller.centerPoint = playerObject;
+            controller.Damage = BallDamage;
 
             ball_list.Add(ball);
         }
