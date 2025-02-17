@@ -1,19 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Status")]
     [SerializeField] public bool IsMoving = false;
     [SerializeField] private float Health = 1000f;
-    [SerializeField] public int Score = 0;
+    [SerializeField] private int Score = 0;
     [SerializeField] private int UpgradesUnlocked = 0;
-
 
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
@@ -21,9 +17,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float m_PickupRadius = 5f;
 
     [Header("Refrences")]
-    [SerializeField] private GameObject enemy;
+    [SerializeField] private GameObject Enemy;
     [SerializeField] private GameObject HealthBar;
     [SerializeField] private GameObject PickupRadius;
+    [SerializeField] private Image UpgradeStatusBar;
 
     [Header("Weapons")]
     [SerializeField] private GameObject ThrowingKnife;
@@ -61,17 +58,19 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             velocity.x = MovementSpeed;
 
-        if (Input.GetKey(KeyCode.Space)) {
-            var thing = Instantiate(enemy);
-            thing.transform.position = new Vector3(Random.Range(-25, 25), Random.Range(-25, 25));
-        }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
             TimeSystem.TogglePause();
         }
 
-        if (Input.GetKeyDown(KeyCode.U))
+
+        if (Input.GetKey(KeyCode.Space)) {
+            var thing = Instantiate(Enemy);
+            thing.transform.position = new Vector3(Random.Range(-25, 25), Random.Range(-25, 25));
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.U))
         {
             UpgradeController.Instance.PromptRandomUpgrades();
         }
@@ -95,5 +94,23 @@ public class PlayerController : MonoBehaviour
     public void SetPickupRadius(float radius) 
     {
         PickupRadius.transform.localScale = new Vector3(radius, radius, 1);
+    }
+
+    public void AddScore(int points)
+    {
+        int upgradeCount = UpgradeController.Instance.AppliedUpgrades.Count;
+        int nextUpgradeAt = Mathf.FloorToInt(Mathf.Pow(1 + (upgradeCount * 0.5f), 2) * 200);
+
+        if (Score > nextUpgradeAt)
+            UpgradeController.Instance.PromptRandomUpgrades();
+
+        Score += points;
+        
+        // progress bar 
+        int lastUpgradeReq = Mathf.Max(0, Mathf.FloorToInt(Mathf.Pow(1 + ((upgradeCount - 1) * 0.5f), 2) * 200));
+        float p = (float) (Score - lastUpgradeReq) / (nextUpgradeAt - lastUpgradeReq);
+        UpgradeStatusBar.fillAmount = p;
+
+        // Debug.Log($"Current: {Score}, Next: {nextUpgradeAt}, LastUpgrade: {lastUpgradeReq}, p: {p}");
     }
 }
