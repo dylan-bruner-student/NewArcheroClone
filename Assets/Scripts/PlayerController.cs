@@ -14,9 +14,9 @@ public class PlayerController : MonoBehaviour
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] private float MaxHealth = 1000f;
-    [SerializeField] private float m_PickupRadius = 5f;
+    [SerializeField] public float m_PickupRadius = 1.5f;
 
-    [Header("Refrences")]
+    [Header("References")]
     [SerializeField] private GameObject Enemy;
     [SerializeField] private GameObject HealthBar;
     [SerializeField] private GameObject PickupRadius;
@@ -93,6 +93,7 @@ public class PlayerController : MonoBehaviour
 
     public void SetPickupRadius(float radius) 
     {
+        m_PickupRadius = radius;
         PickupRadius.transform.localScale = new Vector3(radius, radius, 1);
     }
 
