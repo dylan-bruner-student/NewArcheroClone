@@ -11,12 +11,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float Health = 1000f;
     [SerializeField] private float Shield = 50f;
     [SerializeField] private int Score = 0;
-    [SerializeField] private int UpgradesUnlocked = 0;
 
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] private float MaxHealth = 1000f;
     [SerializeField] private float MaxShield = 50f;
+    [SerializeField] public float CritChance = 0f;
+    [SerializeField] private float CritModifier = 1.75f;
+    [SerializeField] public float ShieldRegenSpeed = 5;
     [SerializeField] public float m_PickupRadius = 1.5f;
 
     [Header("References")]
@@ -24,6 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject HealthBar;
     [SerializeField] private GameObject ShieldBar;
     [SerializeField] private GameObject PickupRadius;
+    [SerializeField] public GameObject HitMarker;
     [SerializeField] private Image UpgradeStatusBar;
 
     [Header("Weapons")]
@@ -49,12 +52,13 @@ public class PlayerController : MonoBehaviour
 
 
     void Update() {
+        Instance = this;
+
         Vector3 velocity = Vector3.zero;
 
         if (Time.time - LastDamagedTime > 1 && Shield < MaxShield)
         {
-            Debug.Log("Regen shield!");
-            Shield = Mathf.Clamp(Shield + (5 * Time.deltaTime), 0, MaxShield);
+            Shield = Mathf.Clamp(Shield + (ShieldRegenSpeed * Time.deltaTime), 0, MaxShield);
             Damage(0);
         }
 
@@ -148,5 +152,12 @@ public class PlayerController : MonoBehaviour
         UpgradeStatusBar.fillAmount = p;
 
         // Debug.Log($"Current: {Score}, Next: {nextUpgradeAt}, LastUpgrade: {lastUpgradeReq}, p: {p}");
+    }
+
+    public float TryCrit(float damage)
+    {
+        if (Random.value < CritChance)
+            damage *= CritModifier;
+        return damage;
     }
 }

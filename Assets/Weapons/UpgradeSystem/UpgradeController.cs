@@ -22,7 +22,9 @@ public class UpgradeController : MonoBehaviour
     public static List<Upgrade> Upgrades = new List<Upgrade> { 
         new MightyBalls(), new AddBall(), new HeavyBalls(),
         new KnifeSkills(), new LongerKnifes(),
-        new DoublePickupRadius()
+        new DoublePickupRadius(),
+        new FasterRegen(),
+        new CritChance()
     };
 
     public List<Upgrade> AppliedUpgrades = new List<Upgrade>();

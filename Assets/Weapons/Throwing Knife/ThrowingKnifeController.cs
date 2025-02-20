@@ -26,17 +26,14 @@ public class ThrowingKnifeController : BaseWeaponController
 
         Vector3 move = Vector3.MoveTowards(transform.position, Target.transform.position, Time.deltaTime * MovementSpeed);
         transform.position = move;
+    }
 
-        var targetCollider = Target.GetComponent<Collider2D>();
-        if (targetCollider == null)
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        var controller = collision.gameObject.GetComponent<EnemyController>();
+        if (controller != null)
         {
-            Debug.LogWarning("The target doesn't have a 2D collider!!!");
-            return;
-        }
-
-        if (GetComponent<BoxCollider2D>().IsTouching(targetCollider))
-        {
-            Target.GetComponent<EnemyController>().Damage(Damage);
+            controller.Damage(Damage);
             Destroy(gameObject);
         }
     }
