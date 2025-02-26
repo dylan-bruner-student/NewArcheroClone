@@ -8,8 +8,9 @@ public class PlayerController : MonoBehaviour
     [Header("Status")]
     [SerializeField] public bool IsMoving = false;
     [SerializeField] public float LastDamagedTime = 0f;
+    [SerializeField] public float LastSprintTime = 0f;
     [SerializeField] private float Health = 1000f;
-    [SerializeField] private float Shield = 50f;
+    [SerializeField] private float Stamina = 50f;
     [SerializeField] private int Score = 0;
 
     [Header("Other")]
@@ -18,8 +19,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float MaxShield = 50f;
     [SerializeField] public float CritChance = 0f;
     [SerializeField] private float CritModifier = 1.75f;
-    [SerializeField] public float ShieldRegenSpeed = 5;
+    [SerializeField] public float StaminaRegenSpeed = 5;
     [SerializeField] public float m_PickupRadius = 1.5f;
+    [SerializeField] public float SprintModifier = 2f;
 
     [Header("References")]
     [SerializeField] private GameObject Enemy;
@@ -27,11 +29,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject ShieldBar;
     [SerializeField] private GameObject PickupRadius;
     [SerializeField] public GameObject HitMarker;
+    [SerializeField] public GameObject CoinDrop;
     [SerializeField] private Image UpgradeStatusBar;
 
     [Header("Weapons")]
-    [SerializeField] private GameObject ThrowingKnife;
-    [SerializeField] private GameObject MightyBall;
+    [SerializeField] public GameObject ThrowingKnife;
+    [SerializeField] public GameObject MightyBall;
 
     
     public static PlayerController Instance { get; private set; }
@@ -39,9 +42,6 @@ public class PlayerController : MonoBehaviour
 
     void Start() {
         Instance = this;
-
-        gameObject.AddComponent<ThrowingKnifeManager>().ThrowingKnifePrefab = ThrowingKnife;
-        gameObject.AddComponent<MightyBallsManager>().BallRefrence = MightyBall;
     }
 
     private void OnValidate()
@@ -56,9 +56,9 @@ public class PlayerController : MonoBehaviour
 
         Vector3 velocity = Vector3.zero;
 
-        if (Time.time - LastDamagedTime > 1 && Shield < MaxShield)
+        if ((Time.time - LastDamagedTime > 1 && Time.time - LastSprintTime > 1) && Stamina < MaxShield)
         {
-            Shield = Mathf.Clamp(Shield + (ShieldRegenSpeed * Time.deltaTime), 0, MaxShield);
+            Stamina = Mathf.Clamp(Stamina + (StaminaRegenSpeed * Time.deltaTime), 0, MaxShield);
             Damage(0);
         }
 
@@ -73,8 +73,15 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             velocity.x = MovementSpeed;
 
+        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 1)
+        {
+            LastSprintTime = Time.time;
+            velocity *= SprintModifier;
+            Stamina -= 10 * Time.deltaTime;
+            Damage(0);
+        }
 
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             TimeSystem.TogglePause();
         }
@@ -111,9 +118,9 @@ public class PlayerController : MonoBehaviour
         if (damage > 0)
             LastDamagedTime = Time.time;
 
-        float shieldLeft = Mathf.Max(0, Shield - damage);
-        damage = Mathf.Max(0, damage - Shield);
-        Shield = shieldLeft;
+        float shieldLeft = Mathf.Max(0, Stamina - damage);
+        damage = Mathf.Max(0, damage - Stamina);
+        Stamina = shieldLeft;
 
         Health = (int) Mathf.Clamp(Health - damage, 0, MaxHealth);
         
@@ -123,7 +130,7 @@ public class PlayerController : MonoBehaviour
         HealthBar.transform.localPosition = new Vector3((p - 1) * 1 / 2, HealthBar.transform.localPosition.y, HealthBar.transform.localPosition.z);
 
         // update the shield bar
-        float s = Shield / MaxShield;
+        float s = Stamina / MaxShield;
         ShieldBar.transform.localScale = new Vector3(s, ShieldBar.transform.localScale.y, ShieldBar.transform.localScale.z);
         ShieldBar.transform.localPosition = new Vector3((s - 1) * 1 / 2, ShieldBar.transform.localPosition.y, ShieldBar.transform.localPosition.z);
     }
@@ -141,7 +148,7 @@ public class PlayerController : MonoBehaviour
         int upgradeCount = UpgradeController.Instance.AppliedUpgrades.Count;
         int nextUpgradeAt = Mathf.FloorToInt(Mathf.Pow(1 + (upgradeCount * 0.5f), 2) * 200);
 
-        if (Score > nextUpgradeAt)
+        if (Score >= nextUpgradeAt)
             UpgradeController.Instance.PromptRandomUpgrades();
 
         Score += points;
@@ -151,7 +158,7 @@ public class PlayerController : MonoBehaviour
         float p = (float) (Score - lastUpgradeReq) / (nextUpgradeAt - lastUpgradeReq);
         UpgradeStatusBar.fillAmount = p;
 
-        // Debug.Log($"Current: {Score}, Next: {nextUpgradeAt}, LastUpgrade: {lastUpgradeReq}, p: {p}");
+        Debug.Log($"Current: {Score}, Next: {nextUpgradeAt}, LastUpgrade: {lastUpgradeReq}, p: {p}");
     }
 
     public float TryCrit(float damage)

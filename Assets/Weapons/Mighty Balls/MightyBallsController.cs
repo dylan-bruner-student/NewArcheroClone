@@ -32,6 +32,7 @@ public class MightyBallsController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        collision.gameObject.GetComponent<EnemyController>()?.Damage(Damage);
+        collision.gameObject.GetComponent<EnemyController>()?.Damage(gameObject, Damage);
+        Debug.Log($"Hitting {collision.gameObject}");
     }
 }

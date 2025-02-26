@@ -1,4 +1,4 @@
-public class FasterRegen : Upgrade
+public class StaminaUpgrade : Upgrade
 {
     public override string Name => "Faster shield regen";
     public override string Description => "";
@@ -7,6 +7,6 @@ public class FasterRegen : Upgrade
 
     protected override void ApplyUpgrade()
     {
-        PlayerController.Instance.ShieldRegenSpeed += 1;
+        PlayerController.Instance.StaminaRegenSpeed += 1;
     }
 }

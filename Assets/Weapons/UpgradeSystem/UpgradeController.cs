@@ -20,10 +20,10 @@ public class UpgradeController : MonoBehaviour
     public Action Callback_Option3 = null;
 
     public static List<Upgrade> Upgrades = new List<Upgrade> { 
-        new MightyBalls(), new AddBall(), new HeavyBalls(),
+        new MightyBalls(), new AddBall(), new HeavyBalls(), new Incinerator(),
         new KnifeSkills(), new LongerKnifes(),
         new DoublePickupRadius(),
-        new FasterRegen(),
+        new StaminaUpgrade(),
         new CritChance()
     };
 
@@ -43,6 +43,7 @@ public class UpgradeController : MonoBehaviour
 
     public void PromptRandomUpgrades()
     {
+        Debug.Log("Prompting upgrades!");
         var theUpgrades = Upgrades
             .Where(upgrade => CheckCriteria(upgrade)) // Make sure the precursor upgrades are met
             .Where(upgrade => AppliedUpgrades.Count(u => u.GetType() == upgrade.GetType()) < upgrade.MaxApplied) // Make sure there isn't too many applied
@@ -104,5 +105,12 @@ public class UpgradeController : MonoBehaviour
         }
 
         return true;
+    }
+
+    public bool HasUpgrade(Type upgrade)
+    {
+        foreach (var u in AppliedUpgrades)
+            if (u.GetType() == upgrade) return true;
+        return false;
     }
 }

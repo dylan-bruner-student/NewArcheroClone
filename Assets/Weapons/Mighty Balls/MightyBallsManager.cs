@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MightyBallsManager : BaseWeaponManager
 {
-    [SerializeField] public GameObject BallRefrence;
     [SerializeField] public int BallCount = 0;
     [SerializeField] public float Offset = 2f;
     [SerializeField] public float BallDamage = 1.0f;
@@ -47,7 +46,7 @@ public class MightyBallsManager : BaseWeaponManager
             float angle = i * (2 * Mathf.PI / BallCount); // Distribute evenly around a circle
             Vector3 spawnPosition = playerObject.transform.position + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * Offset;
 
-            var ball = Instantiate(BallRefrence, spawnPosition, Quaternion.identity);
+            var ball = Instantiate(PlayerController.Instance.MightyBall, spawnPosition, Quaternion.identity);
             var controller = ball.AddComponent<MightyBallsController>();
             controller.centerPoint = playerObject;
             controller.Damage = BallDamage;

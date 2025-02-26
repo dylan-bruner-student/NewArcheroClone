@@ -33,7 +33,7 @@ public class ThrowingKnifeController : BaseWeaponController
         var controller = collision.gameObject.GetComponent<EnemyController>();
         if (controller != null)
         {
-            controller.Damage(Damage);
+            controller.Damage(gameObject, Damage);
             Destroy(gameObject);
         }
     }

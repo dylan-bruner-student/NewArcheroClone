@@ -10,7 +10,7 @@ public class PickupScript : MonoBehaviour
         if (collision.gameObject.tag == "Coin")
         {
             Destroy(collision.gameObject);
-            PlayerController.Instance.AddScore(1);
+            PlayerController.Instance.AddScore(25);
         }
     }
 }

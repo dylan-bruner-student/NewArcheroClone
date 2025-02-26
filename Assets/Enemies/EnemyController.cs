@@ -5,7 +5,9 @@ using UnityEngine;
 
 public abstract class EnemyController : MonoBehaviour
 {
-    public void Damage(float damage)
+    public virtual bool Targetable { get; } = true;
+
+    public void Damage(GameObject source, float damage)
     {
         var newDamage = PlayerController.Instance.TryCrit(damage);
 
@@ -15,8 +17,8 @@ public abstract class EnemyController : MonoBehaviour
         if (newDamage != damage)
             hitMarker.GetComponentInChildren<TextMeshPro>().color = Color.red;
 
-        OnDamage(newDamage);
+        OnDamage(source, newDamage);
     }
 
-    protected abstract void OnDamage(float damage);
+    protected abstract void OnDamage(GameObject source, float damage);
 }

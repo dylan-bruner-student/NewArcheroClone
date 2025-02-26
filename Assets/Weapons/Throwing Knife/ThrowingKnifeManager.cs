@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class ThrowingKnifeManager : BaseWeaponManager
 {
-    [SerializeField] public GameObject ThrowingKnifePrefab;
-
     private float LastSpawnTime = 0;
 
     [SerializeField] public float SpawnDelay = 0.25f;
@@ -23,7 +21,7 @@ public class ThrowingKnifeManager : BaseWeaponManager
         if (LastSpawnTime + SpawnDelay < Time.time)
         {
             LastSpawnTime = Time.time;
-            var gameObj = Instantiate(ThrowingKnifePrefab);
+            var gameObj = Instantiate(PlayerController.Instance.ThrowingKnife);
             gameObj.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;
             gameObj.GetComponent<BaseWeaponController>().Target = FindNearestEnemyInRange();
         }
@@ -42,6 +40,9 @@ public class ThrowingKnifeManager : BaseWeaponManager
 
         foreach (var enemy in enemies)
         {
+            if (enemy.GetComponent<EnemyController>()?.Targetable != true)
+                continue;
+
             float distance = Vector3.Distance(player.transform.position, enemy.transform.position);
             if (distance < AttackRange && distance < minDistance)
             {
