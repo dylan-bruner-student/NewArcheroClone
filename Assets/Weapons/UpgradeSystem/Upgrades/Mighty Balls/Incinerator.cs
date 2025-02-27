@@ -10,5 +10,6 @@ public class Incinerator : Upgrade
 
     protected override void ApplyUpgrade()
     {
+        MightyBallsManager.Instance.Refresh();
     }
 }

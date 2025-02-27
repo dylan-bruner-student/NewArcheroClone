@@ -41,16 +41,22 @@ public class MightyBallsManager : BaseWeaponManager
         ClearBalls();
         var playerObject = PlayerController.Instance.gameObject;
 
+        bool incin = UpgradeController.Instance.HasUpgrade(typeof(Incinerator));
+
         for (int i = 0; i < BallCount; i++)
         {
             float angle = i * (2 * Mathf.PI / BallCount); // Distribute evenly around a circle
             Vector3 spawnPosition = playerObject.transform.position + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * Offset;
 
             var ball = Instantiate(PlayerController.Instance.MightyBall, spawnPosition, Quaternion.identity);
+
+            if (incin)
+                ball.GetComponentInChildren<SpriteRenderer>().color = new Color(1.0f, 178f/255f, 0);
+
             var controller = ball.AddComponent<MightyBallsController>();
             controller.centerPoint = playerObject;
             controller.Damage = BallDamage;
-
+            
             ball_list.Add(ball);
         }
     }

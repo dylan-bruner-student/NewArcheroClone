@@ -72,8 +72,8 @@ public class CactusMineController : EnemyController
     {
         if (collision.gameObject == PlayerController.Instance.gameObject)
         {
-            Debug.Log("Your cooked!");
             SpawnNeedles();
+            Destroy(gameObject);
         }
     }
 }
