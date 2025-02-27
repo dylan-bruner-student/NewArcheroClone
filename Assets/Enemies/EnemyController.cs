@@ -5,6 +5,8 @@ using UnityEngine;
 
 public abstract class EnemyController : MonoBehaviour
 {
+    public System.Action<GameObject> OnDeath;
+
     public virtual bool Targetable { get; } = true;
 
     public void Damage(GameObject source, float damage)
@@ -21,4 +23,10 @@ public abstract class EnemyController : MonoBehaviour
     }
 
     protected abstract void OnDamage(GameObject source, float damage);
+
+    private void OnDestroy()
+    {
+        OnDeath?.Invoke(gameObject);
+        Destroy(gameObject);
+    }
 }
