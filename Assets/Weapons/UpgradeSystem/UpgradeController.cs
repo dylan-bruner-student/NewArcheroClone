@@ -1,4 +1,5 @@
 
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,7 @@ public class UpgradeController : MonoBehaviour
     public static List<Upgrade> Upgrades = new List<Upgrade> { 
         new MightyBalls(), new AddBall(), new HeavyBalls(), new Incinerator(),
         new KnifeSkills(), new LongerKnifes(),
+        new UnlockRailGun(), new RailGunSpeedIncrease(),
         new DoublePickupRadius(),
         new StaminaUpgrade(),
         new CritChance()

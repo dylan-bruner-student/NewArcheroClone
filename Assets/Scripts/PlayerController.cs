@@ -44,6 +44,11 @@ public class PlayerController : MonoBehaviour
         Instance = this;
     }
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(this);
+    }
+
     private void OnValidate()
     {
         Damage(0);

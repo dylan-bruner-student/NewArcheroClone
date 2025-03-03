@@ -10,6 +10,7 @@ public class WaveSystem : MonoBehaviour
     [SerializeField] private GameObject m_CactusMine;
     [SerializeField] private GameObject m_Fish;
     [SerializeField] private GameObject m_SquareMan;
+    [SerializeField] private GameObject m_EyeSucker;
 
     [System.Serializable]
     public class EnemyType
@@ -18,6 +19,7 @@ public class WaveSystem : MonoBehaviour
         public string name;
         public float difficultyRating; // How "hard" this enemy is (1-10)
         public int minWaveToAppear = 1; // Minimum wave number when this enemy can appear
+        public bool ignoreInCount = false; // If we can start a wave while it's still alive
     }
 
     [System.Serializable]
@@ -27,7 +29,7 @@ public class WaveSystem : MonoBehaviour
         [System.Serializable]
         public class EnemyGroup
         {
-            public GameObject enemyPrefab;
+            public EnemyType enemyType;
             public int count;
             public float spawnDelay = 0.5f;
         }
@@ -96,29 +98,10 @@ public class WaveSystem : MonoBehaviour
         // Only initialize if list is empty
         if (enemyTypes.Count == 0)
         {
-            enemyTypes.Add(new EnemyType
-            {
-                prefab = m_CactusMine,
-                name = "Cactus Mine",
-                difficultyRating = 1,
-                minWaveToAppear = 1
-            });
-
-            enemyTypes.Add(new EnemyType
-            {
-                prefab = m_Fish,
-                name = "Fish",
-                difficultyRating = 2,
-                minWaveToAppear = 2
-            });
-
-            enemyTypes.Add(new EnemyType
-            {
-                prefab = m_SquareMan,
-                name = "Box Man",
-                difficultyRating = 4,
-                minWaveToAppear = 3
-            });
+            enemyTypes.Add(new EnemyType { prefab = m_Fish, name = "Fish", difficultyRating = 2, minWaveToAppear = 1 });
+            enemyTypes.Add(new EnemyType { prefab = m_SquareMan, name = "Box Man", difficultyRating = 4, minWaveToAppear = 10 });
+            enemyTypes.Add(new EnemyType { prefab = m_CactusMine, name = "Cactus Mine", difficultyRating = 1, minWaveToAppear = 15, ignoreInCount = true });
+            enemyTypes.Add(new EnemyType { prefab = m_EyeSucker, name = "Eye Sucker", difficultyRating = 10, minWaveToAppear = 20 });
 
             // Add more enemy types as needed
         }
@@ -182,7 +165,7 @@ public class WaveSystem : MonoBehaviour
 
                 Wave.EnemyGroup group = new Wave.EnemyGroup
                 {
-                    enemyPrefab = selectedType.prefab,
+                    enemyType = selectedType,
                     count = count,
                     spawnDelay = spawnDelay
                 };
@@ -210,7 +193,7 @@ public class WaveSystem : MonoBehaviour
 
             newWave.enemies.Add(new Wave.EnemyGroup
             {
-                enemyPrefab = easiestType.prefab,
+                enemyType = easiestType,
                 count = Mathf.Max(1, currentWaveNumber),
                 spawnDelay = baseSpawnDelay
             });
@@ -270,7 +253,7 @@ public class WaveSystem : MonoBehaviour
         {
             for (int i = 0; i < enemyGroup.count; i++)
             {
-                SpawnEnemy(enemyGroup.enemyPrefab);
+                SpawnEnemy(enemyGroup.enemyType.prefab, enemyGroup.enemyType.ignoreInCount);
                 yield return new WaitForSeconds(enemyGroup.spawnDelay);
             }
         }
@@ -278,7 +261,7 @@ public class WaveSystem : MonoBehaviour
         isSpawning = false;
     }
 
-    private void SpawnEnemy(GameObject enemyPrefab)
+    private void SpawnEnemy(GameObject enemyPrefab, bool ignoreInCount)
     {
         if (enemyPrefab == null || player == null) return;
 
@@ -288,7 +271,7 @@ public class WaveSystem : MonoBehaviour
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         activeEnemies.Add(enemy);
-        remainingEnemies++;
+        if (!ignoreInCount) remainingEnemies++;
 
         // Subscribe to enemy death event
         if (enemy.TryGetComponent<EnemyController>(out var enemyComponent))
