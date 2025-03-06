@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
@@ -9,19 +10,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public bool IsMoving = false;
     [SerializeField] public float LastDamagedTime = 0f;
     [SerializeField] public float LastSprintTime = 0f;
-    [SerializeField] private float Health = 1000f;
+    [SerializeField] public float Health = 1000f;
     [SerializeField] private float Stamina = 50f;
     [SerializeField] private int Score = 0;
 
     [Header("Other")]
     [SerializeField] private float MovementSpeed = 10f;
-    [SerializeField] private float MaxHealth = 1000f;
+    [SerializeField] public float MaxHealth = 1000f;
     [SerializeField] private float MaxShield = 50f;
     [SerializeField] public float CritChance = 0f;
     [SerializeField] private float CritModifier = 1.75f;
     [SerializeField] public float StaminaRegenSpeed = 5;
     [SerializeField] public float m_PickupRadius = 1.5f;
     [SerializeField] public float SprintModifier = 2f;
+    [SerializeField] public float RegenPerKill = 0f;
 
     [Header("References")]
     [SerializeField] private GameObject Enemy;
@@ -46,7 +48,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
     }
 
     private void OnValidate()
@@ -138,6 +140,9 @@ public class PlayerController : MonoBehaviour
         float s = Stamina / MaxShield;
         ShieldBar.transform.localScale = new Vector3(s, ShieldBar.transform.localScale.y, ShieldBar.transform.localScale.z);
         ShieldBar.transform.localPosition = new Vector3((s - 1) * 1 / 2, ShieldBar.transform.localPosition.y, ShieldBar.transform.localPosition.z);
+
+        if (Health <= 0)
+            SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
     }
 
     public void Damage(int damage) { Damage((float)damage);  }

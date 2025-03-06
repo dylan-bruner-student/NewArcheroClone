@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UpgradeController : MonoBehaviour
 {
@@ -12,9 +13,9 @@ public class UpgradeController : MonoBehaviour
 
 
     [SerializeField] private GameObject UpgradeMenu;
-    [SerializeField] private GameObject Option1;
-    [SerializeField] private GameObject Option2;
-    [SerializeField] private GameObject Option3;
+    [SerializeField] private Text Option1;
+    [SerializeField] private Text Option2;
+    [SerializeField] private Text Option3;
 
     public Action Callback_Option1 = null;
     public Action Callback_Option2 = null;
@@ -26,7 +27,8 @@ public class UpgradeController : MonoBehaviour
         new UnlockRailGun(), new RailGunSpeedIncrease(),
         new DoublePickupRadius(),
         new StaminaUpgrade(),
-        new CritChance()
+        new CritChance(),
+        new HealthRegen(),
     };
 
     public List<Upgrade> AppliedUpgrades = new List<Upgrade>();
@@ -45,18 +47,14 @@ public class UpgradeController : MonoBehaviour
 
     public void PromptRandomUpgrades()
     {
-        Debug.Log("Prompting upgrades!");
-        var theUpgrades = Upgrades
+        var theUpgrade = Upgrades
             .Where(upgrade => CheckCriteria(upgrade)) // Make sure the precursor upgrades are met
             .Where(upgrade => AppliedUpgrades.Count(u => u.GetType() == upgrade.GetType()) < upgrade.MaxApplied) // Make sure there isn't too many applied
             .OrderBy(upgrade => Guid.NewGuid()) // Randomize the list
             .Take(3)
             .ToList();
 
-        if (theUpgrades.Count == 3)
-            PromptUpgrade(theUpgrades[0], theUpgrades[1], theUpgrades[2]);
-        else
-            Debug.LogError("Couldn't find three possible upgrades!");
+        PromptUpgrade(theUpgrade[0], theUpgrade[1], theUpgrade[2]);
     }
 
 
@@ -67,9 +65,9 @@ public class UpgradeController : MonoBehaviour
         Callback_Option3 = u3.SystemApplyUpgrade;
 
 
-        Option1.GetComponent<TextMeshProUGUI>().text = u1.Name;
-        Option2.GetComponent<TextMeshProUGUI>().text = u2.Name;
-        Option3.GetComponent<TextMeshProUGUI>().text = u3.Name;
+        Option1.text = u1.Name;
+        Option2.text = u2.Name;
+        Option3.text = u3.Name;
         
         TimeSystem.Pause();
         UpgradeMenu.SetActive(true);

@@ -28,5 +28,12 @@ public abstract class EnemyController : MonoBehaviour
     {
         OnDeath?.Invoke(gameObject);
         Destroy(gameObject);
+
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.Health = Mathf.Clamp(
+                PlayerController.Instance.Health + (PlayerController.Instance.MaxHealth * PlayerController.Instance.RegenPerKill),
+                0,
+                PlayerController.Instance.MaxHealth
+                );
     }
 }
