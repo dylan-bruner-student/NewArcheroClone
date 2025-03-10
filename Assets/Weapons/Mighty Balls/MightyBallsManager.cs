@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,9 +17,13 @@ public class MightyBallsManager : BaseWeaponManager
         SpawnBalls();
     }
 
-    private void Start()
+    private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
         SpawnBalls();
     }
 
@@ -51,12 +54,12 @@ public class MightyBallsManager : BaseWeaponManager
             var ball = Instantiate(PlayerController.Instance.MightyBall, spawnPosition, Quaternion.identity);
 
             if (incin)
-                ball.GetComponentInChildren<SpriteRenderer>().color = new Color(1.0f, 178f/255f, 0);
+                ball.GetComponentInChildren<SpriteRenderer>().color = new Color(1.0f, 178f / 255f, 0);
 
             var controller = ball.AddComponent<MightyBallsController>();
             controller.centerPoint = playerObject;
             controller.Damage = BallDamage;
-            
+
             ball_list.Add(ball);
         }
     }

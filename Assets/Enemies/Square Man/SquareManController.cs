@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SquareManController : EnemyController
 {
-    private float Health = 100f;
+    private float Health = 25f;
     private float MovementSpeed = 15f;
 
     protected override void OnDamage(GameObject source, float damage)

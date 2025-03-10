@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CactusMineController : EnemyController
@@ -12,7 +10,8 @@ public class CactusMineController : EnemyController
 
     private int NeedleCount = 50;
 
-    protected override void OnDamage(GameObject source, float damage) {
+    protected override void OnDamage(GameObject source, float damage)
+    {
         if (source.GetComponent<MightyBallsController>() == null)
             return;
 

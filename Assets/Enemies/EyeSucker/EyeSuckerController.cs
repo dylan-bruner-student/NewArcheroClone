@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EyeSuckerController : EnemyController
@@ -26,7 +25,7 @@ public class EyeSuckerController : EnemyController
     [SerializeField] private float MaxTeleportRange = 20f;      // Maximum distance from player
 
     private Coroutine damageCoroutine;
-    
+
     void Start()
     {
         animator = GetComponent<Animator>();

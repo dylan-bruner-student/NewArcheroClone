@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TimeSystem
@@ -15,7 +14,7 @@ public class TimeSystem
     }
 
     public static void Resume()
-    { 
+    {
         if (!Paused) return;
         Time.timeScale = Scale;
         Paused = false;

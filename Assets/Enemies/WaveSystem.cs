@@ -7,6 +7,8 @@ public class WaveSystem : MonoBehaviour
 {
     public static WaveSystem instance;
 
+    [SerializeField] private GameObject m_SpawnBounds;
+
     [SerializeField] private GameObject m_CactusMine;
     [SerializeField] private GameObject m_Fish;
     [SerializeField] private GameObject m_SquareMan;
@@ -68,6 +70,7 @@ public class WaveSystem : MonoBehaviour
     private Queue<Wave> waveQueue = new Queue<Wave>();
     private List<GameObject> activeEnemies = new List<GameObject>();
     private Wave currentWave;
+    private Bounds spawnBounds;
 
     private void Awake()
     {
@@ -77,6 +80,33 @@ public class WaveSystem : MonoBehaviour
             Destroy(gameObject);
 
         InitializeEnemyTypes();
+
+        // Get bounds of spawn box
+        if (m_SpawnBounds != null)
+        {
+            // Try to get bounds from collider or renderer
+            Collider2D collider = m_SpawnBounds.GetComponent<Collider2D>();
+            if (collider != null)
+            {
+                spawnBounds = collider.bounds;
+            }
+            else
+            {
+                Renderer renderer = m_SpawnBounds.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    spawnBounds = renderer.bounds;
+                }
+                else
+                {
+                    Debug.LogError("SpawnBox has no Collider2D or Renderer! Using default spawn method.");
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("SpawnBox not assigned! Using default spawn method.");
+        }
     }
 
     private void Start()
@@ -263,11 +293,30 @@ public class WaveSystem : MonoBehaviour
 
     private void SpawnEnemy(GameObject enemyPrefab, bool ignoreInCount)
     {
-        if (enemyPrefab == null || player == null) return;
+        if (enemyPrefab == null) return;
 
-        // Random position around player
-        Vector2 randomDirection = Random.insideUnitCircle.normalized;
-        Vector3 spawnPos = player.position + new Vector3(randomDirection.x, randomDirection.y, 0) * spawnRadius;
+        Vector3 spawnPos;
+
+        if (m_SpawnBounds != null && spawnBounds.size != Vector3.zero)
+        {
+            // Generate random position within the spawn bounds
+            float randomX = Random.Range(-0.5f, 0.5f);
+            float randomY = Random.Range(-0.5f, 0.5f);
+
+            // Convert from local [-0.5, 0.5] space to world space using the bounds
+            spawnPos = m_SpawnBounds.transform.position + new Vector3(
+                randomX * spawnBounds.size.x,
+                randomY * spawnBounds.size.y,
+                0
+            );
+        }
+        else
+        {
+            // Fallback to old spawning method if SpawnBox not available
+            if (player == null) return;
+            Vector2 randomDirection = Random.insideUnitCircle.normalized;
+            spawnPos = player.position + new Vector3(randomDirection.x, randomDirection.y, 0) * spawnRadius;
+        }
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         activeEnemies.Add(enemy);

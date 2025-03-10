@@ -14,7 +14,7 @@ public class BubbleController : MonoBehaviour
     private void Update()
     {
         transform.position += transform.right * MovementSpeed * Time.deltaTime;
-        
+
         if (Time.time > EndOfLife)
             Destroy(gameObject);
     }

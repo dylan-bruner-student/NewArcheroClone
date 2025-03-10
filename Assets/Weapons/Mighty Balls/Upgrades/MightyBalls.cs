@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 public class MightyBalls : Upgrade
 {
     public override string Name => "Mighty Balls";

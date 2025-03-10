@@ -1,5 +1,3 @@
-using Unity.VisualScripting;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -38,11 +36,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public GameObject ThrowingKnife;
     [SerializeField] public GameObject MightyBall;
 
-    
+
     public static PlayerController Instance { get; private set; }
 
 
-    void Start() {
+    void Start()
+    {
         Instance = this;
     }
 
@@ -58,7 +57,8 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    void Update() {
+    void Update()
+    {
         Instance = this;
 
         Vector3 velocity = Vector3.zero;
@@ -94,7 +94,8 @@ public class PlayerController : MonoBehaviour
         }
 
 
-        if (Input.GetKey(KeyCode.Space)) {
+        if (Input.GetKey(KeyCode.Space))
+        {
             var thing = Instantiate(Enemy);
             thing.transform.position = new Vector3(Random.Range(-25, 25), Random.Range(-25, 25));
         }
@@ -105,12 +106,12 @@ public class PlayerController : MonoBehaviour
         }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
-        { 
+        {
             UpgradeController.Instance.AppliedUpgrades.Clear();
             foreach (var upgrade in UpgradeController.Upgrades)
-                for (int i= 0; i < upgrade.MaxApplied; i++) 
+                for (int i = 0; i < upgrade.MaxApplied; i++)
                     upgrade.SystemApplyUpgrade();
-            
+
             Debug.Log($"Applied {UpgradeController.Instance.AppliedUpgrades.Count} upgrades!");
         }
 
@@ -129,8 +130,8 @@ public class PlayerController : MonoBehaviour
         damage = Mathf.Max(0, damage - Stamina);
         Stamina = shieldLeft;
 
-        Health = (int) Mathf.Clamp(Health - damage, 0, MaxHealth);
-        
+        Health = (int)Mathf.Clamp(Health - damage, 0, MaxHealth);
+
         // update health bar
         float p = Health / MaxHealth;
         HealthBar.transform.localScale = new Vector3(p, HealthBar.transform.localScale.y, HealthBar.transform.localScale.z);
@@ -145,9 +146,9 @@ public class PlayerController : MonoBehaviour
             SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
     }
 
-    public void Damage(int damage) { Damage((float)damage);  }
+    public void Damage(int damage) { Damage((float)damage); }
 
-    public void SetPickupRadius(float radius) 
+    public void SetPickupRadius(float radius)
     {
         m_PickupRadius = radius;
         PickupRadius.transform.localScale = new Vector3(radius, radius, 1);
@@ -162,10 +163,10 @@ public class PlayerController : MonoBehaviour
             UpgradeController.Instance.PromptRandomUpgrades();
 
         Score += points;
-        
+
         // progress bar 
         int lastUpgradeReq = Mathf.Max(0, Mathf.FloorToInt(Mathf.Pow(1 + ((upgradeCount - 1) * 0.5f), 2) * 200));
-        float p = (float) (Score - lastUpgradeReq) / (nextUpgradeAt - lastUpgradeReq);
+        float p = (float)(Score - lastUpgradeReq) / (nextUpgradeAt - lastUpgradeReq);
         UpgradeStatusBar.fillAmount = p;
 
         Debug.Log($"Current: {Score}, Next: {nextUpgradeAt}, LastUpgrade: {lastUpgradeReq}, p: {p}");

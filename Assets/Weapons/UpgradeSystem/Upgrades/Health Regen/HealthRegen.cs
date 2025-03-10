@@ -7,6 +7,6 @@ public class HealthRegen : Upgrade
 
     protected override void ApplyUpgrade()
     {
-        PlayerController.Instance.RegenPerKill += 0.01f;
+        PlayerController.Instance.RegenPerKill += 0.005f;
     }
 }

@@ -1,9 +1,6 @@
-
-using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +18,7 @@ public class UpgradeController : MonoBehaviour
     public Action Callback_Option2 = null;
     public Action Callback_Option3 = null;
 
-    public static List<Upgrade> Upgrades = new List<Upgrade> { 
+    public static List<Upgrade> Upgrades = new List<Upgrade> {
         new MightyBalls(), new AddBall(), new HeavyBalls(), new Incinerator(),
         new KnifeSkills(), new LongerKnifes(),
         new UnlockRailGun(), new RailGunSpeedIncrease(),
@@ -68,12 +65,12 @@ public class UpgradeController : MonoBehaviour
         Option1.text = u1.Name;
         Option2.text = u2.Name;
         Option3.text = u3.Name;
-        
+
         TimeSystem.Pause();
         UpgradeMenu.SetActive(true);
     }
 
-    public void OnPickOption(int index) 
+    public void OnPickOption(int index)
     {
         Debug.Log($"Selected option: {index}");
         UpgradeMenu.SetActive(false);
