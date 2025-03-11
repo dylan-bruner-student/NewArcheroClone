@@ -293,29 +293,45 @@ public class WaveSystem : MonoBehaviour
 
     private void SpawnEnemy(GameObject enemyPrefab, bool ignoreInCount)
     {
-        if (enemyPrefab == null) return;
+        if (enemyPrefab == null || player == null) return;
 
         Vector3 spawnPos;
 
         if (m_SpawnBounds != null && spawnBounds.size != Vector3.zero)
         {
-            // Generate random position within the spawn bounds
-            float randomX = Random.Range(-0.5f, 0.5f);
-            float randomY = Random.Range(-0.5f, 0.5f);
+            // Start with the player's position
+            Vector3 targetPos = player.position;
 
-            // Convert from local [-0.5, 0.5] space to world space using the bounds
-            spawnPos = m_SpawnBounds.transform.position + new Vector3(
-                randomX * spawnBounds.size.x,
-                randomY * spawnBounds.size.y,
-                0
-            );
+            // Make sure target is within bounds
+            targetPos.x = Mathf.Clamp(targetPos.x,
+                spawnBounds.min.x,
+                spawnBounds.max.x);
+            targetPos.y = Mathf.Clamp(targetPos.y,
+                spawnBounds.min.y,
+                spawnBounds.max.y);
+
+            // Generate a random offset from the player (closer to player)
+            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+
+            // Apply the offset to get potential spawn position
+            Vector3 potentialPos = targetPos + new Vector3(randomOffset.x, randomOffset.y, 0);
+
+            // Clamp the position to be within the bounds
+            potentialPos.x = Mathf.Clamp(potentialPos.x,
+                spawnBounds.min.x,
+                spawnBounds.max.x);
+            potentialPos.y = Mathf.Clamp(potentialPos.y,
+                spawnBounds.min.y,
+                spawnBounds.max.y);
+
+            spawnPos = potentialPos;
         }
         else
         {
             // Fallback to old spawning method if SpawnBox not available
-            if (player == null) return;
             Vector2 randomDirection = Random.insideUnitCircle.normalized;
             spawnPos = player.position + new Vector3(randomDirection.x, randomDirection.y, 0) * spawnRadius;
+            Debug.Log("Running old spawn code!");
         }
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
@@ -332,6 +348,7 @@ public class WaveSystem : MonoBehaviour
             Debug.LogWarning("Enemy prefab does not have Enemy component!");
         }
     }
+
 
     private void HandleEnemyDeath(GameObject enemy)
     {
