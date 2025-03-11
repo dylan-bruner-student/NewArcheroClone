@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class WaveSystem : MonoBehaviour
 {
     public static WaveSystem instance;
 
     [SerializeField] private GameObject m_SpawnBounds;
+    [SerializeField] private Text m_WaveText;
 
     [SerializeField] private GameObject m_CactusMine;
     [SerializeField] private GameObject m_Fish;
@@ -147,7 +149,7 @@ public class WaveSystem : MonoBehaviour
         // Create new wave
         Wave newWave = new Wave
         {
-            waveName = "Wave " + currentWaveNumber,
+            waveName = currentWaveNumber.ToString(),
             timeBeforeNextWave = Mathf.Max(minTimeBetweenWaves,
                                           baseTimeBetweenWaves - (currentWaveNumber * 0.1f)),
             waveDifficulty = waveDifficulty
@@ -247,6 +249,7 @@ public class WaveSystem : MonoBehaviour
                 currentWaveDifficulty = currentWave.waveDifficulty;
 
                 Debug.Log($"Starting {currentWave.waveName} (Difficulty: {currentWaveDifficulty:F1})");
+                m_WaveText.text = $"Wave: #{currentWave.waveName}";
 
                 onWaveStart?.Invoke();
                 yield return StartCoroutine(SpawnWave(currentWave));
