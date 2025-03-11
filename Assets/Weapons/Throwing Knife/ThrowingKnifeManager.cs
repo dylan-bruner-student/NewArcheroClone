@@ -18,10 +18,15 @@ public class ThrowingKnifeManager : BaseWeaponManager
     {
         if (LastSpawnTime + SpawnDelay < Time.time)
         {
+            var target = FindNearestEnemyInRange();
+
+            if (target == null)
+                return;
+
             LastSpawnTime = Time.time;
             var gameObj = Instantiate(PlayerController.Instance.ThrowingKnife);
             gameObj.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;
-            gameObj.GetComponent<BaseWeaponController>().Target = FindNearestEnemyInRange();
+            gameObj.GetComponent<BaseWeaponController>().Target = target;
         }
     }
 
