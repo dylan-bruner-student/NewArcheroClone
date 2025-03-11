@@ -3,7 +3,7 @@ using UnityEngine;
 public class TimeSystem
 {
     private static float Scale = Time.timeScale;
-    private static bool Paused = false;
+    public static bool Paused { get; private set; } = false;
 
     public static void Pause()
     {

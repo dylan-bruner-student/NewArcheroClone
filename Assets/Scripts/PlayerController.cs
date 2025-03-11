@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int Score = 0;
 
     [Header("Other")]
+    [SerializeField] private float TimeScale = 1f;
     [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] public float MaxHealth = 1000f;
     [SerializeField] private float MaxShield = 50f;
@@ -54,6 +55,9 @@ public class PlayerController : MonoBehaviour
     {
         Damage(0);
         SetPickupRadius(m_PickupRadius);
+
+        if (!TimeSystem.Paused)
+            Time.timeScale = TimeScale;
     }
 
 
