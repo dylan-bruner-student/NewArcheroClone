@@ -26,7 +26,6 @@ public class PlayerController : MonoBehaviour
 
     [Header("Touch Controls")]
     [SerializeField] private float doubleTapTimeThreshold = 0.3f;
-    // Removed sprintDuration as we'll sprint until touch release
 
     [Header("References")]
     [SerializeField] private GameObject Enemy;
@@ -44,9 +43,9 @@ public class PlayerController : MonoBehaviour
     // Touch control variables
     private float lastTapTime;
     private bool isSprinting = false;
-    private int sprintingTouchId = -1; // Track which touch is causing the sprint
     private Vector2 touchStartPos;
     private bool isDragging = false;
+    private bool isDoubleTap = false;
 
     public static PlayerController Instance { get; private set; }
 
@@ -92,82 +91,68 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             velocity.x = MovementSpeed;
 
-        // Handle touch input
-        bool sprintTouchStillActive = false;
-
-        for (int i = 0; i < Input.touchCount; i++)
-        {
-            Touch touch = Input.GetTouch(i);
-
-            // Check if this is the touch that started sprinting
-            if (touch.fingerId == sprintingTouchId)
-            {
-                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
-                {
-                    // Touch that caused sprint has ended
-                    isSprinting = false;
-                    sprintingTouchId = -1;
-                }
-                else
-                {
-                    // Touch is still active
-                    sprintTouchStillActive = true;
-                }
-            }
-
-            if (i == 0) // Use first touch for movement
-            {
-                switch (touch.phase)
-                {
-                    case TouchPhase.Began:
-                        // Check for double tap (sprint)
-                        if (Time.time - lastTapTime < doubleTapTimeThreshold)
-                        {
-                            if (Stamina > 1)
-                            {
-                                isSprinting = true;
-                                sprintingTouchId = touch.fingerId;
-                                LastSprintTime = Time.time;
-                            }
-                        }
-                        lastTapTime = Time.time;
-
-                        // Start drag
-                        touchStartPos = touch.position;
-                        isDragging = true;
-                        break;
-
-                    case TouchPhase.Moved:
-                    case TouchPhase.Stationary:
-                        if (isDragging)
-                        {
-                            // Calculate movement direction based on drag
-                            Vector2 dragDirection = touch.position - touchStartPos;
-
-                            // Only move if drag distance is significant
-                            if (dragDirection.magnitude > 20f)
-                            {
-                                // Normalize and scale the movement
-                                dragDirection.Normalize();
-                                velocity.x = dragDirection.x * MovementSpeed;
-                                velocity.y = dragDirection.y * MovementSpeed;
-                            }
-                        }
-                        break;
-
-                    case TouchPhase.Ended:
-                    case TouchPhase.Canceled:
-                        isDragging = false;
-                        break;
-                }
-            }
-        }
-
-        // If the sprinting touch is no longer active among all touches, stop sprinting
-        if (isSprinting && !sprintTouchStillActive && sprintingTouchId != -1)
+        // Reset sprinting flag if no touches are active
+        if (Input.touchCount == 0)
         {
             isSprinting = false;
-            sprintingTouchId = -1;
+            isDoubleTap = false;
+        }
+
+        // Handle touch input
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    // Check for double tap (sprint)
+                    if (Time.time - lastTapTime < doubleTapTimeThreshold)
+                    {
+                        isDoubleTap = true;
+                        if (Stamina > 1)
+                        {
+                            isSprinting = true;
+                            LastSprintTime = Time.time;
+                        }
+                    }
+                    lastTapTime = Time.time;
+
+                    // Start drag
+                    touchStartPos = touch.position;
+                    isDragging = true;
+                    break;
+
+                case TouchPhase.Moved:
+                case TouchPhase.Stationary:
+                    if (isDragging)
+                    {
+                        // Calculate movement direction based on drag
+                        Vector2 dragDirection = touch.position - touchStartPos;
+
+                        // Only move if drag distance is significant
+                        if (dragDirection.magnitude > 20f)
+                        {
+                            // Normalize and scale the movement
+                            dragDirection.Normalize();
+                            velocity.x = dragDirection.x * MovementSpeed;
+                            velocity.y = dragDirection.y * MovementSpeed;
+                        }
+                    }
+
+                    // Continue sprinting as long as the touch is active after a double tap
+                    if (isDoubleTap && Stamina > 1)
+                    {
+                        isSprinting = true;
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    isDragging = false;
+                    // Sprint will end when touchCount becomes 0
+                    break;
+            }
         }
 
         // Apply sprint if using keyboard or touch sprint is active
@@ -210,7 +195,6 @@ public class PlayerController : MonoBehaviour
         IsMoving = rb.velocity.sqrMagnitude > 0;
     }
 
-    // Rest of the code remains unchanged...
     public void Damage(float damage)
     {
         if (damage > 0)
