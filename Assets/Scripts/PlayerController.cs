@@ -24,6 +24,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public float SprintModifier = 2f;
     [SerializeField] public float RegenPerKill = 0f;
 
+    [Header("Touch Controls")]
+    [SerializeField] private float doubleTapTimeThreshold = 0.3f;
+    [SerializeField] private float sprintDuration = 1.5f;
+
     [Header("References")]
     [SerializeField] private GameObject Enemy;
     [SerializeField] private GameObject HealthBar;
@@ -37,9 +41,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public GameObject ThrowingKnife;
     [SerializeField] public GameObject MightyBall;
 
+    // Touch control variables
+    private float lastTapTime;
+    private bool isSprinting = false;
+    private float sprintEndTime = 0f;
+    private Vector2 touchStartPos;
+    private bool isDragging = false;
 
     public static PlayerController Instance { get; private set; }
-
 
     void Start()
     {
@@ -60,7 +69,6 @@ public class PlayerController : MonoBehaviour
             Time.timeScale = TimeScale;
     }
 
-
     void Update()
     {
         Instance = this;
@@ -73,7 +81,13 @@ public class PlayerController : MonoBehaviour
             Damage(0);
         }
 
+        // Check if touch sprint should be ended
+        if (isSprinting && Time.time > sprintEndTime)
+        {
+            isSprinting = false;
+        }
 
+        // Handle keyboard input
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
             velocity.y = MovementSpeed;
         else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
@@ -84,7 +98,58 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             velocity.x = MovementSpeed;
 
-        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 1)
+        // Handle touch input
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    // Check for double tap (sprint)
+                    if (Time.time - lastTapTime < doubleTapTimeThreshold)
+                    {
+                        if (Stamina > 1)
+                        {
+                            isSprinting = true;
+                            sprintEndTime = Time.time + sprintDuration;
+                            LastSprintTime = Time.time;
+                        }
+                    }
+                    lastTapTime = Time.time;
+
+                    // Start drag
+                    touchStartPos = touch.position;
+                    isDragging = true;
+                    break;
+
+                case TouchPhase.Moved:
+                case TouchPhase.Stationary:
+                    if (isDragging)
+                    {
+                        // Calculate movement direction based on drag
+                        Vector2 dragDirection = touch.position - touchStartPos;
+
+                        // Only move if drag distance is significant
+                        if (dragDirection.magnitude > 20f)
+                        {
+                            // Normalize and scale the movement
+                            dragDirection.Normalize();
+                            velocity.x = dragDirection.x * MovementSpeed;
+                            velocity.y = dragDirection.y * MovementSpeed;
+                        }
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    isDragging = false;
+                    break;
+            }
+        }
+
+        // Apply sprint if using keyboard or touch sprint is active
+        if ((Input.GetKey(KeyCode.LeftShift) || isSprinting) && Stamina > 1)
         {
             LastSprintTime = Time.time;
             velocity *= SprintModifier;
@@ -96,7 +161,6 @@ public class PlayerController : MonoBehaviour
         {
             TimeSystem.TogglePause();
         }
-
 
         if (Input.GetKey(KeyCode.Space))
         {
@@ -118,7 +182,6 @@ public class PlayerController : MonoBehaviour
 
             Debug.Log($"Applied {UpgradeController.Instance.AppliedUpgrades.Count} upgrades!");
         }
-
 
         var rb = GetComponent<Rigidbody2D>();
         rb.velocity = velocity;
