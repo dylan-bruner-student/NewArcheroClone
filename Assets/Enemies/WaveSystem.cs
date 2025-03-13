@@ -130,10 +130,10 @@ public class WaveSystem : MonoBehaviour
         // Only initialize if list is empty
         if (enemyTypes.Count == 0)
         {
-            enemyTypes.Add(new EnemyType { prefab = m_Fish, name = "Fish", difficultyRating = 2, minWaveToAppear = 1 });
-            enemyTypes.Add(new EnemyType { prefab = m_SquareMan, name = "Box Man", difficultyRating = 4, minWaveToAppear = 10 });
-            enemyTypes.Add(new EnemyType { prefab = m_CactusMine, name = "Cactus Mine", difficultyRating = 1, minWaveToAppear = 15, ignoreInCount = true });
-            enemyTypes.Add(new EnemyType { prefab = m_EyeSucker, name = "Eye Sucker", difficultyRating = 10, minWaveToAppear = 20 });
+            enemyTypes.Add(new EnemyType { prefab = m_Fish, name = "Fish", difficultyRating = 1, minWaveToAppear = 1 });
+            enemyTypes.Add(new EnemyType { prefab = m_SquareMan, name = "Box Man", difficultyRating = 5, minWaveToAppear = 10 });
+            enemyTypes.Add(new EnemyType { prefab = m_CactusMine, name = "Cactus Mine", difficultyRating = 5, minWaveToAppear = 15, ignoreInCount = true });
+            enemyTypes.Add(new EnemyType { prefab = m_EyeSucker, name = "Eye Sucker", difficultyRating = 20, minWaveToAppear = 20 });
 
             // Add more enemy types as needed
         }
@@ -298,7 +298,9 @@ public class WaveSystem : MonoBehaviour
     {
         if (enemyPrefab == null || player == null) return;
 
-        Vector3 spawnPos;
+        Vector3 spawnPos = Vector3.zero;
+        float minDistanceFromPlayer = 3f; // Minimum distance from player
+        int maxAttempts = 30; // Prevent infinite loops
 
         if (m_SpawnBounds != null && spawnBounds.size != Vector3.zero)
         {
@@ -313,29 +315,74 @@ public class WaveSystem : MonoBehaviour
                 spawnBounds.min.y,
                 spawnBounds.max.y);
 
-            // Generate a random offset from the player (closer to player)
-            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+            int attempts = 0;
+            bool validPosition = false;
 
-            // Apply the offset to get potential spawn position
-            Vector3 potentialPos = targetPos + new Vector3(randomOffset.x, randomOffset.y, 0);
+            // Keep trying until we find a valid position or hit max attempts
+            while (!validPosition && attempts < maxAttempts)
+            {
+                // Generate a random offset from the player
+                Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
 
-            // Clamp the position to be within the bounds
-            potentialPos.x = Mathf.Clamp(potentialPos.x,
-                spawnBounds.min.x,
-                spawnBounds.max.x);
-            potentialPos.y = Mathf.Clamp(potentialPos.y,
-                spawnBounds.min.y,
-                spawnBounds.max.y);
+                // Apply the offset to get potential spawn position
+                Vector3 potentialPos = targetPos + new Vector3(randomOffset.x, randomOffset.y, 0);
 
-            spawnPos = potentialPos;
+                // Clamp the position to be within the bounds
+                potentialPos.x = Mathf.Clamp(potentialPos.x,
+                    spawnBounds.min.x,
+                    spawnBounds.max.x);
+                potentialPos.y = Mathf.Clamp(potentialPos.y,
+                    spawnBounds.min.y,
+                    spawnBounds.max.y);
+
+                // Check if position is far enough from player
+                if (Vector3.Distance(potentialPos, player.position) >= minDistanceFromPlayer)
+                {
+                    spawnPos = potentialPos;
+                    validPosition = true;
+                }
+                else
+                {
+                    attempts++;
+                }
+            }
+
+            // If we couldn't find a valid position, use the bounds edges
+            if (!validPosition)
+            {
+                // Find a point on the edge of the bounds that's far from player
+                float edgeX = (Random.value > 0.5f) ? spawnBounds.min.x : spawnBounds.max.x;
+                float edgeY = (Random.value > 0.5f) ? spawnBounds.min.y : spawnBounds.max.y;
+                float randomX = Random.Range(spawnBounds.min.x, spawnBounds.max.x);
+                float randomY = Random.Range(spawnBounds.min.y, spawnBounds.max.y);
+
+                // Create two possible positions (one on X edge, one on Y edge)
+                Vector3 posOnXEdge = new Vector3(edgeX, randomY, 0);
+                Vector3 posOnYEdge = new Vector3(randomX, edgeY, 0);
+
+                // Choose the one farther from the player
+                if (Vector3.Distance(posOnXEdge, player.position) >
+                    Vector3.Distance(posOnYEdge, player.position))
+                {
+                    spawnPos = posOnXEdge;
+                }
+                else
+                {
+                    spawnPos = posOnYEdge;
+                }
+            }
         }
         else
         {
             // Fallback to old spawning method if SpawnBox not available
+            // Use a larger radius to ensure minimum distance
+            float adjustedRadius = Mathf.Max(spawnRadius, minDistanceFromPlayer);
             Vector2 randomDirection = Random.insideUnitCircle.normalized;
-            spawnPos = player.position + new Vector3(randomDirection.x, randomDirection.y, 0) * spawnRadius;
+            spawnPos = player.position + new Vector3(randomDirection.x, randomDirection.y, 0) * adjustedRadius;
             Debug.Log("Running old spawn code!");
         }
+
+
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         activeEnemies.Add(enemy);
@@ -351,6 +398,7 @@ public class WaveSystem : MonoBehaviour
             Debug.LogWarning("Enemy prefab does not have Enemy component!");
         }
     }
+
 
 
     private void HandleEnemyDeath(GameObject enemy)

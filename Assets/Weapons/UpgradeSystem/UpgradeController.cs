@@ -21,7 +21,8 @@ public class UpgradeController : MonoBehaviour
     public static List<Upgrade> Upgrades = new List<Upgrade> {
         new MightyBalls(), new AddBall(), new HeavyBalls(), new Incinerator(),
         new KnifeSkills(), new LongerKnifes(),
-        new UnlockRailGun(), new RailGunSpeedIncrease(),
+        new UnlockRailGun(), new RailGunSpeedIncrease(), new OneGuyTwoRails(),
+        new UnlockShuriken(), new IncreaseShurikenDamage(), new IncreaseChainLength(),
         new DoublePickupRadius(),
         new StaminaUpgrade(),
         new CritChance(),

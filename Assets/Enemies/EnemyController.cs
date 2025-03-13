@@ -13,6 +13,7 @@ public abstract class EnemyController : MonoBehaviour
 
         var hitMarker = Instantiate(PlayerController.Instance.HitMarker);
         hitMarker.transform.position = transform.position;
+        hitMarker.GetComponentInChildren<TextMeshPro>().text = Mathf.RoundToInt(newDamage).ToString();
 
         if (newDamage != damage)
             hitMarker.GetComponentInChildren<TextMeshPro>().color = Color.red;

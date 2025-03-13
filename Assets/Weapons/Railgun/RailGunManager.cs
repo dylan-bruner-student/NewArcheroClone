@@ -9,8 +9,16 @@ public class RailGunManager : BaseWeaponManager
     private float LastShotTime = 0;
 
     [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private LineRenderer secondLineRenderer; // Second line renderer for dual shots
     [SerializeField] private float rayVisualDuration = 0.1f; // How long the ray stays visible
+    [SerializeField] private bool DualRailing = false;
     private float rayVisualEndTime;
+
+    public void ToggleDualRailing()
+    {
+        DualRailing = !DualRailing;
+        Debug.Log($"Dual Railing: {(DualRailing ? "Enabled" : "Disabled")}");
+    }
 
     private void Start()
     {
@@ -19,28 +27,44 @@ public class RailGunManager : BaseWeaponManager
         {
             lineRenderer = GetComponent<LineRenderer>();
             if (lineRenderer == null)
-            {
                 lineRenderer = gameObject.AddComponent<LineRenderer>();
 
-                // Set up default LineRenderer properties
-                lineRenderer.startWidth = 0.05f;
-                lineRenderer.endWidth = 0.05f;
-                lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-                lineRenderer.startColor = Color.cyan;
-                lineRenderer.endColor = Color.cyan;
-            }
         }
 
-        // Initially disable the line renderer
+        lineRenderer.startWidth = 0.1f;
+        lineRenderer.endWidth = 0.1f;
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.startColor = Color.red;
+        lineRenderer.endColor = Color.red;
+
+        // Create second line renderer for dual rail
+        if (secondLineRenderer == null)
+        {
+            GameObject secondLineObj = new GameObject("SecondRailLine");
+            secondLineObj.transform.parent = transform;
+            secondLineObj.transform.localPosition = Vector3.zero;
+            secondLineRenderer = secondLineObj.AddComponent<LineRenderer>();
+
+            // Match settings with first line renderer
+            secondLineRenderer.startWidth = lineRenderer.startWidth;
+            secondLineRenderer.endWidth = lineRenderer.endWidth;
+            secondLineRenderer.material = lineRenderer.material;
+            secondLineRenderer.startColor = Color.red;
+            secondLineRenderer.endColor = Color.red;
+        }
+
+        // Initially disable the line renderers
         lineRenderer.enabled = false;
+        secondLineRenderer.enabled = false;
     }
 
     private void Update()
     {
-        // Hide the line renderer if its duration has expired
-        if (lineRenderer.enabled && Time.time > rayVisualEndTime)
+        // Hide the line renderers if their duration has expired
+        if (Time.time > rayVisualEndTime)
         {
             lineRenderer.enabled = false;
+            secondLineRenderer.enabled = false;
         }
 
         if (Time.time < LastShotTime + ShotDelay) return;
@@ -50,6 +74,27 @@ public class RailGunManager : BaseWeaponManager
 
         LastShotTime = Time.time;
 
+        // Fire the first shot
+        FireRailShot(target, lineRenderer);
+
+        // If dual railing is enabled, fire a second shot at another target or the same target
+        if (DualRailing)
+        {
+            GameObject secondTarget = FindSecondTarget(target);
+            if (secondTarget != null)
+            {
+                FireRailShot(secondTarget, secondLineRenderer);
+            }
+            else
+            {
+                // If no second target found, fire at the same target again
+                FireRailShot(target, secondLineRenderer);
+            }
+        }
+    }
+
+    private void FireRailShot(GameObject target, LineRenderer railLine)
+    {
         Vector2 origin = transform.position;
         Vector2 targetPosition = target.transform.position;
         Vector2 shootDirection = (targetPosition - origin).normalized;
@@ -77,10 +122,10 @@ public class RailGunManager : BaseWeaponManager
         }
 
         // Visualize the ray
-        lineRenderer.enabled = true;
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, origin);
-        lineRenderer.SetPosition(1, endPoint);
+        railLine.enabled = true;
+        railLine.positionCount = 2;
+        railLine.SetPosition(0, origin);
+        railLine.SetPosition(1, endPoint);
         rayVisualEndTime = Time.time + rayVisualDuration;
 
         float modifier = 1.0f;
@@ -96,6 +141,31 @@ public class RailGunManager : BaseWeaponManager
         }
     }
 
+    private GameObject FindSecondTarget(GameObject firstTarget)
+    {
+        var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        if (enemies.Length <= 1)
+            return null;
+
+        GameObject secondTarget = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy == firstTarget || enemy.GetComponent<EnemyController>()?.Targetable != true)
+                continue;
+
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < AttackRange && distance < minDistance)
+            {
+                minDistance = distance;
+                secondTarget = enemy;
+            }
+        }
+
+        return secondTarget;
+    }
 
     private GameObject FindNearestEnemyInRange()
     {

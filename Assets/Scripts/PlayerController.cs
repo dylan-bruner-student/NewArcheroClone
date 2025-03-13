@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float MovementSpeed = 10f;
     [SerializeField] public float MaxHealth = 1000f;
     [SerializeField] private float MaxShield = 50f;
-    [SerializeField] public float CritChance = 0f;
+    [SerializeField] public float CritChance = 0.1f;
     [SerializeField] private float CritModifier = 1.75f;
     [SerializeField] public float StaminaRegenSpeed = 5;
     [SerializeField] public float m_PickupRadius = 1.5f;
@@ -197,6 +197,7 @@ public class PlayerController : MonoBehaviour
 
     public void Damage(float damage)
     {
+
         if (damage > 0)
             LastDamagedTime = Time.time;
 
@@ -205,6 +206,8 @@ public class PlayerController : MonoBehaviour
         Stamina = shieldLeft;
 
         Health = (int)Mathf.Clamp(Health - damage, 0, MaxHealth);
+
+        //Debug.Log($"Player took {damage} new health is {Health}");
 
         // update health bar
         float p = Health / MaxHealth;
@@ -217,7 +220,10 @@ public class PlayerController : MonoBehaviour
         ShieldBar.transform.localPosition = new Vector3((s - 1) * 1 / 2, ShieldBar.transform.localPosition.y, ShieldBar.transform.localPosition.z);
 
         if (Health <= 0)
+        {
             SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
+            Debug.Log("Player died!");
+        }
     }
 
     public void Damage(int damage) { Damage((float)damage); }

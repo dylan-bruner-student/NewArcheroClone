@@ -1,9 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EyeSuckerController : EnemyController
 {
+    private static int LockedEyeCount = 0;
+
     public Sprite m_OpenEye;
+    [SerializeField] private GameObject m_EyeCountText;
 
     private Animator animator;
     private float Health = 75f;
@@ -31,6 +35,7 @@ public class EyeSuckerController : EnemyController
         animator = GetComponent<Animator>();
         // Set initial animation speed
         animator.speed = BaseAnimationSpeed;
+        m_EyeCountText = GameObject.FindGameObjectWithTag("EyeSuckerText");
     }
 
     void Update()
@@ -63,6 +68,8 @@ public class EyeSuckerController : EnemyController
                 if (TimeTillLock >= n_TimeToLock)
                 {
                     LockedOn = true;
+                    LockedEyeCount++;
+                    m_EyeCountText.GetComponent<Text>().text = LockedEyeCount.ToString();
                     HasTeleportedIntoRange = false; // Reset teleport flag when locked on
 
                     // Freeze animation on first frame
@@ -77,11 +84,6 @@ public class EyeSuckerController : EnemyController
                     }
                 }
             }
-        }
-        else
-        {
-            // Player out of range, reset lock
-            ResetLock();
         }
     }
 
@@ -106,24 +108,6 @@ public class EyeSuckerController : EnemyController
 
         // Reset lock timer to give player a fair chance
         TimeTillLock = 0f;
-    }
-
-    private void ResetLock()
-    {
-        LockedOn = false;
-        TimeTillLock = 0f;
-        HasTeleportedIntoRange = false; // Reset teleport flag when lock is reset
-
-        // Unfreeze animation and reset speed
-        animator.speed = BaseAnimationSpeed;
-        GetComponent<Animator>().enabled = true; // Re-enable animator
-
-        // Stop damage coroutine if it's running
-        if (damageCoroutine != null)
-        {
-            StopCoroutine(damageCoroutine);
-            damageCoroutine = null;
-        }
     }
 
     private IEnumerator DamagePlayerRoutine(GameObject player)
@@ -156,6 +140,10 @@ public class EyeSuckerController : EnemyController
     // Optional: OnDestroy to ensure coroutines are stopped
     private void OnDestroy()
     {
+        if (LockedOn)
+            LockedEyeCount--;
+
+        m_EyeCountText.GetComponent<Text>().text = LockedEyeCount.ToString();
         if (damageCoroutine != null)
         {
             StopCoroutine(damageCoroutine);
