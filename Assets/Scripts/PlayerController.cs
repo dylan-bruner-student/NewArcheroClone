@@ -169,18 +169,18 @@ public class PlayerController : MonoBehaviour
             TimeSystem.TogglePause();
         }
 
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Backslash) && Input.GetKey(KeyCode.Space))
         {
             var thing = Instantiate(Enemy);
             thing.transform.position = new Vector3(Random.Range(-25, 25), Random.Range(-25, 25));
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.U))
+        if (Input.GetKey(KeyCode.Backslash) && Input.GetKeyDown(KeyCode.U))
         {
             UpgradeController.Instance.PromptRandomUpgrades();
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKey(KeyCode.Backslash) && Input.GetKeyDown(KeyCode.M))
         {
             UpgradeController.Instance.AppliedUpgrades.Clear();
             foreach (var upgrade in UpgradeController.Upgrades)
@@ -190,10 +190,22 @@ public class PlayerController : MonoBehaviour
             Debug.Log($"Applied {UpgradeController.Instance.AppliedUpgrades.Count} upgrades!");
         }
 
+        // Apply velocity to Rigidbody2D
         var rb = GetComponent<Rigidbody2D>();
         rb.velocity = velocity;
         IsMoving = rb.velocity.sqrMagnitude > 0;
+
+        // Rotate the object based on movement direction
+        if (velocity.x > 0) // Moving right
+        {
+            GameObject.FindGameObjectWithTag("PlayerSprite").transform.rotation = Quaternion.Euler(0, -180, 0);
+        }
+        else if (velocity.x < 0) // Moving left
+        {
+            GameObject.FindGameObjectWithTag("PlayerSprite").transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
     }
+
 
     public void Damage(float damage)
     {
